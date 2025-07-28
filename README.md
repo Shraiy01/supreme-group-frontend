@@ -34,3 +34,52 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+1. Project Setup
+
+git clone repo-url
+cd supreme-group-frontend
+npm install
+npm run dev
+
+2. Component architecture overview.
+
+Created separate Components for each section
+Banner
+Contact(Contact,Contact form)
+Footer
+Header
+VideoSection
+Layout
+Utils>images.js to maintain all the images in one place
+
+3. Responsive design strategy.
+   For responsive design I have used Tailwind breakpoints and implemented the Css according to the break points
+
+4. Performance
+   Optimized animation performance with Framer Motion
+   Reduced bundle size through selective imports
+
+5. Accessibility considerations
+   Semantic HTML structure
+   Proper color contrast ratios
+   Focus states for all interactive elements
+
+6. Explanation of any third-party libraries used
+   I have used External libraries like
+
+   1. Tailwind CSS v4.1 For fast UI development,Animation utilities for basic transitions
+   2. Farmer Motion for animation part
+
+7. Assumptions made and decisions taken during the implementation process.
+
+   1. Project Architecture
+   2. Responsive Design
+   3. Responsive Design (Custom animation is time taking also tailwind utility speeds up development)
+
+8. Challenges faced and potential solutions.
+   Not much challenges I have faced but in the video rendering and animation part I have faced challenges
+   to implement animation and scrolling triggers
+
+9. Suggested upcoming features and improvements.
+   We can improve the rendering of multiple videos and animation which is making website page heavy so we can optimize it more
