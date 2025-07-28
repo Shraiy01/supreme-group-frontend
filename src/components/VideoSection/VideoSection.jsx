@@ -15,22 +15,24 @@ const VideoSection = () => {
             src: '/videos/Commercial.mp4',
         },
         {
-            title: 'Trunk Solutions',
+            title: 'Passenger Vehicles',
             description: 'Revving up Nonwoven innovation from interior to exterior.',
             src: '/videos/Trunk.mp4',
         },
         {
-            title: 'Exterior Solutions',
-            description: 'Premium nonwoven solutions for vehicle exteriors.',
+            title: 'Passenger Vehicles',
+            description: 'Revving up Nonwoven innovation from interior to exterior.',
             src: '/videos/Exterior.mp4',
         },
     ];
 
     const containerRef = useRef(null);
     const heroRef = useRef(null);
+    const contentRef = useRef(null);
+    const videoRefs = useRef([]);
     const [heroFixed, setHeroFixed] = useState(false);
     const [activeVideo, setActiveVideo] = useState(0);
-
+    const [contentVisible, setContentVisible] = useState(false);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -45,29 +47,66 @@ const VideoSection = () => {
 
     const heroScrollProgress = useTransform(
         scrollYProgress,
-        [0, 0.1],
+        [0, 0.05],
         [0, 1]
     );
 
+    const contentScrollProgress = useTransform(
+        scrollYProgress,
+        [0.05, 0.1],
+        [0, 1]
+    );
+
+    useEffect(() => {
+        const handleVideoPlayback = () => {
+            videoRefs.current.forEach((video, index) => {
+                if (video) {
+                    try {
+                        if (index === activeVideo && contentVisible) {
+                            video.play().catch(e => console.log("Autoplay prevented:", e));
+                        } else {
+                            video.pause();
+                        }
+                    } catch (e) {
+                        console.error("Video playback error:", e);
+                    }
+                }
+            });
+        };
+
+        handleVideoPlayback();
+    }, [activeVideo, contentVisible]);
 
     useEffect(() => {
         const unsubscribe = activeVideoProgress.onChange((latest) => {
-            setActiveVideo(Math.min(Math.round(latest), videos.length - 1));
+            const newActiveVideo = Math.min(Math.round(latest), videos.length - 1);
+            setActiveVideo(newActiveVideo);
         });
 
         const heroUnsubscribe = heroScrollProgress.onChange((latest) => {
             setHeroFixed(latest > 0.5);
         });
 
+        const contentUnsubscribe = contentScrollProgress.onChange((latest) => {
+            setContentVisible(latest > 0.3);
+        });
+
         return () => {
             unsubscribe();
             heroUnsubscribe();
+            contentUnsubscribe();
         };
-    }, [activeVideoProgress, heroScrollProgress]);
+    }, [activeVideoProgress, heroScrollProgress, contentScrollProgress]);
+
+    useEffect(() => {
+        if (contentVisible && activeVideo !== 0) {
+            setActiveVideo(0);
+        }
+    }, [contentVisible]);
 
     return (
         <div className='bg-black'>
-            <div ref={containerRef} className="relative max-w-[1200px] mx-auto w-full  text-white">
+            <div ref={containerRef} className="relative max-w-[1200px] mx-auto w-full text-white">
                 <motion.section
                     ref={heroRef}
                     className={`flex items-center justify-center w-full ${heroFixed ? 'sticky top-10 z-10' : 'h-screen relative'}`}
@@ -78,7 +117,7 @@ const VideoSection = () => {
                         transition: { type: 'spring', damping: 50, stiffness: 100 }
                     }}
                 >
-                    <div className=" px-4">
+                    <div className="px-4">
                         <h1 className="text-4xl md:text-5xl text-center font-light text-white tracking-[-0.5%]">
                             Evolving the drive with
                             <span className="font-semibold"> 360-degree </span>
@@ -87,10 +126,19 @@ const VideoSection = () => {
                     </div>
                 </motion.section>
                 {heroFixed && <div className="h-screen w-full" />}
-                <div className="relative flex justify-between w-full min-h-[400vh]">
+
+                <motion.div
+                    ref={contentRef}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{
+                        opacity: contentVisible ? 1 : 0,
+                        y: contentVisible ? 0 : 50,
+                        transition: { duration: 0.3, ease: "easeOut" }
+                    }}
+                    className="relative flex justify-between w-full min-h-[600vh]"
+                >
                     <div className="sticky top-[150px] h-screen w-full flex justify-center overflow-hidden">
                         <div className="w-[40%] h-full flex">
-
                             <div className="w-[90%] h-full flex flex-col justify-center pl-6 pr-4">
                                 {videos.map((video, index) => (
                                     <div key={index} className="relative mb-16">
@@ -98,7 +146,7 @@ const VideoSection = () => {
                                             className={`absolute left-0 top-0 h-full w-[3px] ${activeVideo === index ? 'bg-white' : 'bg-gray-600'}`}
                                             animate={{
                                                 opacity: activeVideo === index ? 1 : 0.6,
-                                                transition: { duration: 0.3 }
+                                                transition: { duration: 0.2 }
                                             }}
                                         />
                                         <motion.div
@@ -108,8 +156,8 @@ const VideoSection = () => {
                                                 y: 0,
                                                 opacity: activeVideo === index ? 1 : 0.6,
                                                 transition: {
-                                                    y: { duration: 0.4 },
-                                                    opacity: { duration: 0.3 }
+                                                    y: { duration: 0.3 },
+                                                    opacity: { duration: 0.2 }
                                                 }
                                             }}
                                         >
@@ -127,14 +175,14 @@ const VideoSection = () => {
                         <div className="w-[50%] h-full relative">
                             {videos.map((video, index) => (
                                 <AnimatePresence key={index}>
-                                    {activeVideo === index && (
+                                    {(activeVideo === index || (index === 0 && !contentVisible)) && (
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
-                                       animate={{
+                                            animate={{
                                                 opacity: 1,
                                                 scale: 1,
                                                 transition: {
-                                                    duration: 0.5,
+                                                    duration: 0.3,
                                                     ease: [0.33, 1, 0.68, 1]
                                                 }
                                             }}
@@ -142,11 +190,12 @@ const VideoSection = () => {
                                             className="absolute inset-0"
                                         >
                                             <video
+                                                ref={el => videoRefs.current[index] = el}
                                                 autoPlay
                                                 loop
                                                 muted
                                                 playsInline
-                                                className="h-full w-full "
+                                                className="h-full w-full"
                                             >
                                                 <source src={video.src} type="video/mp4" />
                                             </video>
@@ -156,10 +205,9 @@ const VideoSection = () => {
                             ))}
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
-
     );
 };
 
